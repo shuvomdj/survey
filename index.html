@@ -1,0 +1,559 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Faculty Members Survey</title><style>
+*{box-sizing:border-box}body{margin:0;background:#e9edf2;color:#17212d;font:15px 'Segoe UI',Arial,sans-serif}.window{max-width:1050px;margin:28px auto;background:#f2f2f2;border:1px solid #aeb4bb;box-shadow:0 10px 32px #24314230}.titlebar{background:#e5eaf0;border-bottom:1px solid #c3c9d0;padding:12px 18px;font-size:14px}.main{padding:22px 28px 26px}h1{text-align:center;font-size:25px;margin:3px 0 27px;letter-spacing:.3px}.meta{display:grid;grid-template-columns:235px 1fr;gap:9px 13px;margin-bottom:20px}.metalabel{background:#e1e1e1;border:1px solid #a8a8a8;padding:12px;font-weight:600}input[type=text],input[type=number]{width:100%;padding:10px;border:1px solid #a5a5a5;background:white;font:inherit;min-width:0}fieldset{border:1px solid #a7a7a7;padding:14px;margin:0}legend{font-weight:600;padding:0 8px}.scroll{overflow-x:auto}table{border-collapse:separate;border-spacing:3px;width:100%;min-width:760px}th{background:#dedede;border:1px solid #a9a9a9;padding:12px 7px;text-align:center}td{padding:3px}td.position{background:#e1e1e1;border:1px solid #aaa;font-weight:600;padding:12px;width:215px}td input{text-align:center;height:42px}tfoot td{font-weight:700;background:#e2e2e2;text-align:center;padding:10px}.total{text-align:right;font-size:18px;font-weight:700;margin:18px 2px 22px}.actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}button,.filebutton{font:600 14px 'Segoe UI',Arial,sans-serif;border:1px solid #999;background:#e8e8e8;padding:12px 18px;cursor:pointer;min-width:125px;color:#161616;text-align:center}button:hover,.filebutton:hover{background:#d9e5f4}button.primary{background:#d7e6f7;border-color:#7393b6}.status{font-size:13px;color:#42613b;margin-top:17px;min-height:19px}.records{margin-top:22px;border-top:1px solid #c6c6c6;padding-top:16px}.records h2{font-size:18px;margin:0 0 10px}.recordscroll{overflow:auto;max-height:320px}.recordtable{min-width:690px;border-collapse:collapse}.recordtable th,.recordtable td{border:1px solid #bbb;padding:8px;text-align:left}.recordtable td{background:white}.muted{color:#596575;font-size:13px}.danger{color:#9c2525}.filebutton input{display:none}@media(max-width:650px){.window{margin:0}.main{padding:14px}.meta{grid-template-columns:1fr}.metalabel{padding:7px}h1{font-size:21px}}
+
+/* The language selector overlays the existing title bar; it changes no form sizes. */
+.titlebar{position:relative}.language-switch{position:absolute;top:7px;right:18px;height:27px;min-width:91px;padding:1px 5px;border:1px solid #aeb4bb;background:#f3f3f3;color:#17212d;font:12px 'Segoe UI',Arial,sans-serif;cursor:pointer}
+
+/* Zoom selector sits alongside the existing language selector without altering the form layout. */
+.zoom-switch{position:absolute;top:7px;right:121px;height:27px;min-width:105px;padding:1px 5px;border:1px solid #aeb4bb;background:#f3f3f3;color:#17212d;font:12px 'Segoe UI',Arial,sans-serif;cursor:pointer}
+
+/* Match the uploaded form's exact row and button heights in Nepali mode. */
+html[lang="ne"] .titlebar{line-height:16px}
+html[lang="ne"] h1{line-height:29px}
+html[lang="ne"] .metalabel,html[lang="ne"] legend,html[lang="ne"] #surveytable th,html[lang="ne"] #surveytable tfoot td{line-height:17px}
+html[lang="ne"] .total{line-height:21px}
+html[lang="ne"] .actions button,html[lang="ne"] .filebutton{line-height:16px}
+
+/* Supabase online indicator: color only, no size/layout changes. */
+.server-state{font-weight:600;white-space:nowrap}
+.server-state.connected{color:#16803a}
+.server-state.disconnected{color:#aa3030}
+ .server-state.connecting{color:#65717f}
+/* Blink only the green server-status dot once every 3 seconds. */
+.server-led{display:inline}
+.server-state.connected .server-led{animation:server-led-blink 3s steps(1,end) infinite}
+@keyframes server-led-blink{0%,72%,100%{opacity:1}78%,92%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.server-state.connected .server-led{animation:none}}
+</style></head><body><div class="window"><div class="titlebar">▣ &nbsp; Faculty Survey — <span id="serverStatus" class="server-state connecting"><span class="server-led" aria-hidden="true">●</span> Connecting...</span><select id="zoom" class="zoom-switch" aria-label="Zoom / जुम"><option value="100">Zoom 100%</option><option value="75" selected>Zoom 75%</option><option value="50">Zoom 50%</option></select><select id="language" class="language-switch" aria-label="Language / भाषा"><option value="en">English</option><option value="ne">नेपाली</option></select></div><div class="main"><h1>FACULTY MEMBERS SURVEY</h1><div class="meta"><label class="metalabel" for="institution">Institution / University:</label><input id="institution" type="text" placeholder="Enter institution name"><label class="metalabel" for="surveyid">Respondent / Survey ID:</label><input id="surveyid" type="text" placeholder="Enter unique survey ID"></div><fieldset><legend>Number of faculty members by academic position, qualification and gender</legend><div class="scroll"><table id="surveytable"><thead><tr><th rowspan="2">Academic Position</th><th colspan="2">PhD</th><th colspan="2">Master's</th><th colspan="2">Bachelor's</th></tr><tr><th>Male</th><th>Female</th><th>Male</th><th>Female</th><th>Male</th><th>Female</th></tr></thead><tbody></tbody><tfoot><tr><td>Column totals</td><td id="sum0">0</td><td id="sum1">0</td><td id="sum2">0</td><td id="sum3">0</td><td id="sum4">0</td><td id="sum5">0</td></tr></tfoot></table></div></fieldset><div class="total">Total Faculty: <span id="grand">0</span></div><div class="actions"><button class="primary" id="submit">Submit / Save</button><button id="clear">Clear Form</button><button id="view">View Records</button><button id="export">Export</button><label class="filebutton">Import<input type="file" id="import" accept=".csv,text/csv"></label></div><div id="status" class="status" role="status"></div><section class="records" id="records" hidden><h2>Saved Survey Records</h2><p class="muted">Records are stored in this browser on this device. Download CSV regularly to back them up.</p><div class="recordscroll"><table class="recordtable"><thead><tr><th>Saved At</th><th>Institution</th><th>Survey ID</th><th>Total</th><th>Action</th></tr></thead><tbody id="recordbody"></tbody></table></div></section></div></div><script>
+(() => {
+  'use strict';
+
+  const $ = id => document.getElementById(id);
+  // Supabase publishable key is intended for browser clients; it is NOT private.
+  // Table rows are protected by SQL permissions and a narrowly-scoped RPC.
+  const SUPABASE_URL = 'https://nzehriemxfnrloixejub.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_0hNTogN1uCRyaODetPyZkQ_p0DJCiAE';
+  const pendingKeyStorage = 'faculty_survey_pending_cloud_save_v1';
+  let serverState = 'connecting';
+  let serverNextId = null;
+  let saveBusy = false;
+  const storageKey = 'faculty_survey_records_v2'; // Retains records from the uploaded version.
+  const sequenceKey = 'faculty_survey_next_id_v1'; // Retains the earlier automatic-ID sequence.
+  const languageKey = 'faculty_survey_language_v1';
+  const zoomKey = 'faculty_survey_zoom_v2'; // Reset previous zoom preference once; 75% is the new default.
+  const positions = ['Professor', 'Associate Professor', 'Assistant Professor', 'Lecturer / Tutor'];
+  const categories = ['PhD Male', 'PhD Female', 'Master Male', 'Master Female', 'Bachelor Male', 'Bachelor Female'];
+  const keys = [];
+  let records = [];
+  let language = 'en';
+  let lastStatus = null;
+
+  const labels = {
+    en: {
+      titlebar: '▣ \u00a0 Faculty Survey — ',
+      serverConnected: '● Server Connected', serverDisconnected: '● Server Disconnected', serverConnecting: '● Connecting...',
+      title: 'FACULTY MEMBERS SURVEY',
+      zoom: 'Zoom',
+      institution: 'Institution / University:',
+      institutionHint: 'Enter institution name',
+      surveyId: 'Respondent / Survey ID:',
+      surveyIdHint: 'Automatically generated survey number',
+      legend: 'Number of faculty members by academic position, qualification and gender',
+      academic: 'Academic Position',
+      qualification: ['PhD', "Master's", "Bachelor's"],
+      gender: ['Male', 'Female'],
+      positions,
+      totals: 'Column totals',
+      grand: 'Total Faculty:',
+      submit: 'Submit', clear: 'Clear Form', view: 'View Records',
+      export: 'Export', import: 'Import',
+      records: 'Saved Survey Records',
+      recordsHint: 'These are records saved or imported in this browser. To view all cloud records, open your Supabase dashboard. CSV import adds local copies only.',
+      recordCols: ['Saved At', 'Institution', 'Survey ID', 'Total', 'Action'],
+      delete: 'Delete',
+      deleteQuestion: 'Remove this browser copy? The survey will remain in the Supabase database.',
+      ready: 'Ready to enter a new survey.',
+      cleared: 'Form cleared.',
+      validation: 'Enter whole numbers from 0 to 999999 only.',
+      required: 'Institution is required.',
+      duplicate: 'This Survey ID already exists. The next available ID has been selected.',
+      saved: n => 'Saved successfully (' + n + ' records). Download CSV for an external backup.',
+      deleted: 'Record deleted.',
+      csvDownloaded: n => 'CSV backup downloaded with ' + n + ' records.',
+      imported: n => 'Imported ' + n + ' new records; skipped duplicates.',
+      importFailed: msg => 'Import failed: ' + msg,
+      wrongCsv: 'This is not a Faculty Survey CSV backup.',
+      wrongColumns: 'Incorrect number of CSV columns.',
+      wrongCounts: 'Invalid faculty count.',
+      csvQuote: 'Unclosed CSV quote.',
+      storageFailed: 'Browser storage failed. Export your existing data as CSV.',
+      onlineSaving: 'Sending survey to Supabase…',
+      onlineSaved: id => 'Survey #' + id + ' saved in Supabase and backed up in this browser.',
+      onlineSavedNoLocal: id => 'Survey #' + id + ' saved in Supabase, but this browser could not keep a local copy. Check browser storage.',
+      onlineFailed: why => 'Online submission not confirmed: ' + why + '. Your entries remain on screen; retry when connected.',
+      secureBrowserRequired: 'This browser does not support secure random IDs.',
+      timedOut: 'The request timed out.',
+      invalidServerConfirmation: 'Unexpected response from the server.',
+      onlineCheckFailed: why => 'Supabase is not reachable: ' + why + '. Run the no-login SQL setup, then check the connection.',
+      csvOnlyLocal: count => 'Imported ' + count + ' browser records. CSV imports are not automatically uploaded to Supabase.'
+    },
+    ne: {
+      titlebar: '▣ \u00a0 संकाय सर्वेक्षण — ',
+      serverConnected: '● सर्भर जडान भयो', serverDisconnected: '● सर्भर जडान छैन', serverConnecting: '● जडान जाँचिँदै...',
+      title: 'संकाय सदस्य सर्वेक्षण',
+      zoom: 'जुम',
+      institution: 'संस्था / विश्वविद्यालय:',
+      institutionHint: 'संस्थाको नाम लेख्नुहोस्',
+      surveyId: 'उत्तरदाता / सर्वेक्षण नं.:',
+      surveyIdHint: 'सर्वेक्षण नम्बर आफैँ आउँछ',
+      legend: 'शैक्षिक पद, योग्यता र लिङ्गअनुसार संकाय सदस्यको संख्या',
+      academic: 'शैक्षिक पद',
+      qualification: ['पीएचडी', 'स्नातकोत्तर', 'स्नातक'],
+      gender: ['पुरुष', 'महिला'],
+      positions: ['प्राध्यापक', 'सहप्राध्यापक', 'सहायक प्राध्यापक', 'व्याख्याता / ट्युटर'],
+      totals: 'स्तम्भको जम्मा',
+      grand: 'कुल संकाय सदस्य:',
+      submit: 'पेश गर्नुहोस्', clear: 'फारम खाली', view: 'अभिलेख हेर्नुहोस्',
+      export: 'निर्यात', import: 'आयात',
+      records: 'सुरक्षित सर्वेक्षण अभिलेख',
+      recordsHint: 'यी अभिलेख यस ब्राउजरमा सुरक्षित वा आयात गरिएका हुन्। सबै अनलाइन अभिलेख हेर्न Supabase ड्यासबोर्ड खोल्नुहोस्। CSV आयात स्थानीय रूपमा मात्र हुन्छ।',
+      recordCols: ['सुरक्षित मिति', 'संस्था', 'सर्वेक्षण नं.', 'जम्मा', 'कार्य'],
+      delete: 'मेट्नुहोस्',
+      deleteQuestion: 'ब्राउजरबाट यो प्रति हटाउने हो? Supabase डाटाबेसमा रहेको विवरण मेटिने छैन।',
+      ready: 'नयाँ सर्वेक्षण प्रविष्ट गर्न तयार।',
+      cleared: 'फारम खाली गरियो।',
+      validation: '० देखि ९९९९९९ सम्मका पूर्ण संख्या मात्र लेख्नुहोस्।',
+      required: 'संस्थाको नाम आवश्यक छ।',
+      duplicate: 'यो सर्वेक्षण नम्बर पहिले नै सुरक्षित छ। अर्को नम्बर चयन गरिएको छ।',
+      saved: n => 'सफलतापूर्वक सुरक्षित गरियो (' + n + ' अभिलेख)। बाहिरी ब्याकअपका लागि CSV डाउनलोड गर्नुहोस्।',
+      deleted: 'स्थानीय अभिलेख हटाइयो।',
+      csvDownloaded: n => n + ' अभिलेखसहित CSV ब्याकअप डाउनलोड गरियो।',
+      imported: n => n + ' नयाँ अभिलेख आयात गरियो; दोहोरिएका प्रविष्टिहरू छोडिए।',
+      importFailed: msg => 'आयात असफल: ' + msg,
+      wrongCsv: 'यो संकाय सर्वेक्षणको CSV ब्याकअप होइन।',
+      wrongColumns: 'CSV का स्तम्भहरूको संख्या मिलेन।',
+      wrongCounts: 'संकाय सदस्यको संख्या मिलेन।',
+      csvQuote: 'CSV मा उद्धरण चिह्न पूरा छैन।',
+      storageFailed: 'ब्राउजरमा सुरक्षित गर्न सकिएन। हालको विवरण CSV मा डाउनलोड गर्नुहोस्।',
+      onlineSaving: 'सर्वेक्षण Supabase मा पठाइँदै छ…',
+      onlineSaved: id => 'सर्वेक्षण नं. ' + id + ' Supabase र यस ब्राउजरमा सुरक्षित भयो।',
+      onlineSavedNoLocal: id => 'सर्वेक्षण नं. ' + id + ' Supabase मा सुरक्षित भयो तर ब्राउजरमा स्थानीय प्रति राख्न सकिएन।',
+      onlineFailed: why => 'अनलाइन पेश भएको पुष्टि भएन: ' + why + '। विवरण फारममै छ; जडान भएपछि फेरि प्रयास गर्नुहोस्।',
+      secureBrowserRequired: 'यो ब्राउजरले सुरक्षित पहिचान नम्बर बनाउन सक्दैन।',
+      timedOut: 'अनुरोधको समयसीमा समाप्त भयो।',
+      invalidServerConfirmation: 'सर्भरबाट अप्रत्याशित जवाफ प्राप्त भयो।',
+      onlineCheckFailed: why => 'Supabase जडान हुन सकेन: ' + why + '। SQL सेटअप र इन्टरनेट जाँच्नुहोस्।',
+      csvOnlyLocal: count => count + ' अभिलेख ब्राउजरमा मात्र आयात भयो। CSV आयात आफैँ Supabase मा अपलोड हुँदैन।'
+    }
+  };
+
+  function t(key, ...args) {
+    const value = labels[language][key];
+    return typeof value === 'function' ? value(...args) : value;
+  }
+
+  try {
+    const stored = JSON.parse(localStorage.getItem(storageKey) || '[]');
+    if (Array.isArray(stored)) records = stored;
+  } catch (_) { records = []; }
+  try {
+    language = localStorage.getItem(languageKey) === 'ne' ? 'ne' : 'en';
+  } catch (_) { language = 'en'; }
+
+  const tbody = document.querySelector('#surveytable tbody');
+  for (let r = 0; r < 4; r++) {
+    const tr = document.createElement('tr');
+    const position = document.createElement('td');
+    position.className = 'position';
+    position.textContent = positions[r];
+    tr.append(position);
+    for (let c = 0; c < 6; c++) {
+      const cell = document.createElement('td');
+      const input = document.createElement('input');
+      input.type = 'number';
+      input.min = '0';
+      input.max = '999999';
+      input.step = '1';
+      input.value = '0';
+      input.setAttribute('aria-label', positions[r] + ' ' + categories[c]);
+      input.addEventListener('input', total);
+      cell.append(input);
+      tr.append(cell);
+      keys.push(input);
+    }
+    tbody.append(tr);
+  }
+
+  // Fix original action-button widths in both languages, with no change in overall layout.
+  const actionItems = [...document.querySelectorAll('.actions > button, .actions > .filebutton')];
+  function lockOriginalActionWidths() {
+    const previousLabels = ['Submit / Save', 'Clear Form', 'View Records', 'Download CSV Backup', 'Import CSV'];
+    actionItems.forEach((el, index) => {
+      const labelNode = el.classList.contains('filebutton') ? el.firstChild : null;
+      const initialText = labelNode ? labelNode.nodeValue : el.textContent;
+      if (labelNode) labelNode.nodeValue = previousLabels[index];
+      else el.textContent = previousLabels[index];
+      const width = el.getBoundingClientRect().width;
+      if (width > 0) {
+        el.style.width = width + 'px';
+        el.style.flexShrink = '0';
+      }
+      if (labelNode) labelNode.nodeValue = initialText;
+      else el.textContent = initialText;
+    });
+  }
+
+  // Preview the server's next sequence number; the database assigns the actual ID.
+  // If another person submits simultaneously, the preview may change on Submit.
+  function showNextId() {
+    $('surveyid').value = Number.isSafeInteger(serverNextId) && serverNextId > 0 ? String(serverNextId) : '—';
+  }
+  function setServerState(value) {
+    serverState = value;
+    const node = $('serverStatus');
+    node.className = 'server-state ' + value;
+    const statusText = t(value === 'connected' ? 'serverConnected' :
+      value === 'disconnected' ? 'serverDisconnected' : 'serverConnecting');
+    const dot = document.createElement('span');
+    dot.className = 'server-led';
+    dot.setAttribute('aria-hidden', 'true');
+    dot.textContent = '●';
+    node.replaceChildren(dot, document.createTextNode(statusText.replace(/^●/, '')));
+  }
+  async function apiRpc(name, parameters) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 16000);
+    try {
+      const response = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + name, {
+        method: 'POST',
+        mode: 'cors',
+        credentials: 'omit',
+        cache: 'no-store',
+        signal: controller.signal,
+        headers: {'apikey': SUPABASE_PUBLISHABLE_KEY,
+          'Content-Type': 'application/json'},
+        body: JSON.stringify(parameters)
+      });
+      const text = await response.text();
+      let data = null;
+      try { data = text ? JSON.parse(text) : null; } catch (_) { data = null; }
+      if (!response.ok) {
+        const detail = data && (data.message || data.error || data.hint);
+        throw Error(String(detail || ('HTTP ' + response.status)).slice(0, 180));
+      }
+      return data;
+    } finally { clearTimeout(timeout); }
+  }
+  async function checkServer() {
+    if (serverState !== 'connected') setServerState('connecting');
+    try {
+      const result = await apiRpc('faculty_survey_status', {});
+      const id = Number(result && result.next_id);
+      if (!Number.isSafeInteger(id) || id < 1) throw Error('Invalid server sequence response');
+      serverNextId = id;
+      setServerState('connected');
+      showNextId();
+      return true;
+    } catch (error) {
+      serverNextId = null;
+      setServerState('disconnected');
+      showNextId();
+      // Do not insert the removed "Ready to enter a new survey" status text.
+      return false;
+    }
+  }
+  function pendingClientKey(institution, values) {
+    const snapshot = JSON.stringify([institution, values]);
+    try {
+      const old = JSON.parse(localStorage.getItem(pendingKeyStorage) || 'null');
+      if (old && old.snapshot === snapshot && /^[a-zA-Z0-9_-]{20,80}$/.test(old.key)) return old.key;
+    } catch (_) {}
+    if (!window.crypto || !window.crypto.getRandomValues) throw Error(t('secureBrowserRequired'));
+    const buffer = new Uint8Array(20);
+    window.crypto.getRandomValues(buffer);
+    const key = 'fs_' + Array.from(buffer, b => b.toString(16).padStart(2, '0')).join('');
+    try { localStorage.setItem(pendingKeyStorage, JSON.stringify({snapshot, key})); } catch (_) {}
+    return key;
+  }
+
+  function total() {
+    const sums = [0, 0, 0, 0, 0, 0];
+    keys.forEach((el, i) => {
+      const v = Number(el.value);
+      if (Number.isSafeInteger(v) && v >= 0) sums[i % 6] += v;
+    });
+    sums.forEach((v, i) => $('sum' + i).textContent = v);
+    $('grand').textContent = sums.reduce((a, b) => a + b, 0);
+  }
+
+  function msg(key, error = false, ...args) {
+    lastStatus = [key, args, error];
+    $('status').textContent = t(key, ...args);
+    $('status').className = 'status' + (error ? ' danger' : '');
+  }
+
+  function refreshLanguage() {
+    const L = labels[language];
+    document.documentElement.lang = language;
+    document.querySelector('.titlebar').firstChild.nodeValue = L.titlebar;
+    setServerState(serverState);
+    document.querySelector('h1').textContent = L.title;
+    for (const opt of $('zoom').options) opt.textContent = L.zoom + ' ' + opt.value + '%';
+    const metaLabels = document.querySelectorAll('.metalabel');
+    metaLabels[0].textContent = L.institution;
+    metaLabels[1].textContent = L.surveyId;
+    $('institution').placeholder = L.institutionHint;
+    $('surveyid').placeholder = L.surveyIdHint;
+    document.querySelector('fieldset legend').textContent = L.legend;
+    const headings = document.querySelectorAll('#surveytable thead th');
+    headings[0].textContent = L.academic;
+    for (let i = 0; i < 3; i++) headings[i + 1].textContent = L.qualification[i];
+    for (let i = 0; i < 6; i++) headings[i + 4].textContent = L.gender[i % 2];
+    const positionsEls = document.querySelectorAll('td.position');
+    positionsEls.forEach((el, i) => el.textContent = L.positions[i]);
+    keys.forEach((el, i) => {
+      const row = Math.floor(i / 6);
+      const col = i % 6;
+      el.setAttribute('aria-label', L.positions[row] + ' ' + L.qualification[Math.floor(col / 2)] + ' ' + L.gender[col % 2]);
+    });
+    document.querySelector('#surveytable tfoot td').textContent = L.totals;
+    document.querySelector('.total').firstChild.nodeValue = L.grand + ' ';
+    ['submit','clear','view','export'].forEach(id => $(id).textContent = L[id]);
+    document.querySelector('.filebutton').firstChild.nodeValue = L.import;
+    document.querySelector('.records h2').textContent = L.records;
+    document.querySelector('.records .muted').textContent = L.recordsHint;
+    document.querySelectorAll('.recordtable thead th').forEach((el, i) => el.textContent = L.recordCols[i]);
+    $('language').value = language;
+    if (lastStatus) $('status').textContent = t(lastStatus[0], ...lastStatus[1]);
+    render();
+  }
+
+  function persist() {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify(records));
+      return true;
+    } catch (_) {
+      msg('storageFailed', true);
+      return false;
+    }
+  }
+
+  function resetInputsOnly() {
+    keys.forEach(el => el.value = '0');
+    showNextId();
+    total();
+  }
+  function reset() {
+    resetInputsOnly();
+    msg('cleared');
+  }
+
+  function valid() {
+    for (const el of keys) {
+      const v = Number(el.value || 0);
+      if (!Number.isSafeInteger(v) || v < 0 || v > 999999) {
+        el.focus();
+        msg('validation', true);
+        return null;
+      }
+    }
+    return keys.map(el => Number(el.value || 0));
+  }
+
+  async function save() {
+    if (saveBusy) return;
+    const institution = $('institution').value.trim();
+    const values = valid();
+    if (!values) return;
+    if (!institution) {
+      msg('required', true);
+      $('institution').focus();
+      return;
+    }
+    let clientKey;
+    try { clientKey = pendingClientKey(institution, values); }
+    catch (error) { msg('onlineFailed', true, error.message); return; }
+    saveBusy = true;
+    $('submit').disabled = true;
+    msg('onlineSaving');
+    try {
+      const res = await apiRpc('submit_faculty_survey', {
+        p_institution: institution, p_counts: values, p_client_key: clientKey
+      });
+      const id = Number(res && res.id);
+      if (!Number.isSafeInteger(id) || id < 1 || !res.submitted_at) {
+        throw Error(t('invalidServerConfirmation'));
+      }
+      setServerState('connected');
+      const next = Number(res.next_id);
+      serverNextId = Number.isSafeInteger(next) && next > 0 ? next : id + 1;
+      const row = {
+        timestamp: res.submitted_at, institution, id: String(id), values,
+        total: values.reduce((a, b) => a + b, 0), client_key: clientKey
+      };
+      const exists = records.some(r => r.client_key === clientKey ||
+        (r.id === row.id && r.timestamp === row.timestamp && r.institution === row.institution));
+      if (!exists) records.push(row);
+      const localSaved = persist();
+      if (localSaved) {
+        try { localStorage.removeItem(pendingKeyStorage); } catch (_) {}
+      }
+      render();
+      resetInputsOnly();
+      msg(localSaved ? 'onlineSaved' : 'onlineSavedNoLocal', !localSaved, id);
+    } catch (error) {
+      setServerState('disconnected');
+      serverNextId = null;
+      showNextId();
+      msg('onlineFailed', true, error.name === 'AbortError' ? t('timedOut') : error.message);
+      // Keep all entries and the idempotency key if confirmation was not received.
+    } finally {
+      saveBusy = false;
+      $('submit').disabled = false;
+    }
+  }
+
+  function render() {
+    const body = $('recordbody');
+    body.replaceChildren();
+    records.slice().reverse().forEach((r, i) => {
+      const tr = document.createElement('tr');
+      [new Date(r.timestamp).toLocaleString(language === 'ne' ? 'ne-NP' : undefined),
+        r.institution, r.id, String(r.total)].forEach(v => {
+        const td = document.createElement('td');
+        td.textContent = v;
+        tr.append(td);
+      });
+      const td = document.createElement('td');
+      const b = document.createElement('button');
+      b.textContent = t('delete');
+      b.style.minWidth = '70px';
+      b.onclick = () => {
+        if (confirm(t('deleteQuestion'))) {
+          const deleted = records.splice(records.length - 1 - i, 1);
+          if (!persist()) { records.splice(records.length - i, 0, ...deleted); return; }
+          render();
+          showNextId();
+          msg('deleted');
+        }
+      };
+      td.append(b);
+      tr.append(td);
+      body.append(tr);
+    });
+  }
+
+  // CSV headers deliberately stay in English so existing backups can be re-imported
+  // regardless of the selected display language.
+  const columns = ['Saved At', 'Institution', 'Survey ID'];
+  for (const p of positions) {
+    for (const q of categories) columns.push(p + ' - ' + q);
+  }
+  columns.push('Total Faculty');
+
+  function quote(v) {
+    const s = String(v ?? '');
+    return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function exportCSV() {
+    const rows = [columns, ...records.map(r => [r.timestamp, r.institution, r.id, ...r.values, r.total])];
+    const csv = '\ufeff' + rows.map(row => row.map(quote).join(',')).join('\r\n');
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'FacultySurvey_Backup_' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.append(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    msg('csvDownloaded', false, records.length);
+  }
+
+  function parseCSV(text) {
+    text = text.replace(/^\ufeff/, '');
+    const out = [];
+    let row = [], field = '', quoted = false;
+    for (let i = 0; i < text.length; i++) {
+      const ch = text[i];
+      if (quoted) {
+        if (ch === '"' && text[i + 1] === '"') { field += '"'; i++; }
+        else if (ch === '"') quoted = false;
+        else field += ch;
+      } else if (ch === '"') quoted = true;
+      else if (ch === ',') { row.push(field); field = ''; }
+      else if (ch === '\n') { row.push(field.replace(/\r$/, '')); out.push(row); row = []; field = ''; }
+      else field += ch;
+    }
+    if (quoted) throw Error(t('csvQuote'));
+    if (field || row.length) { row.push(field.replace(/\r$/, '')); out.push(row); }
+    return out;
+  }
+
+  async function importCSV(file) {
+    if (!file) return;
+    try {
+      const data = parseCSV(await file.text());
+      if (data.length < 1 || data[0].join('|') !== columns.join('|')) throw Error(t('wrongCsv'));
+      const imported = [];
+      for (const row of data.slice(1)) {
+        if (row.length !== 28) throw Error(t('wrongColumns'));
+        const values = row.slice(3, 27).map(Number);
+        if (values.some(v => !Number.isSafeInteger(v) || v < 0 || v > 999999)) throw Error(t('wrongCounts'));
+        imported.push({timestamp: row[0], institution: row[1], id: row[2],
+          values, total: values.reduce((a, b) => a + b, 0)});
+      }
+      const existing = new Set(records.map(r => JSON.stringify([r.timestamp, r.institution, r.id, r.values])));
+      const originalLength = records.length;
+      let added = 0;
+      for (const r of imported) {
+        const key = JSON.stringify([r.timestamp, r.institution, r.id, r.values]);
+        if (!existing.has(key)) { records.push(r); existing.add(key); added++; }
+      }
+      if (!persist()) { records.splice(originalLength); return; }
+      showNextId();
+      render();
+      msg('csvOnlyLocal', false, added);
+    } catch (e) {
+      msg('importFailed', true, e.message);
+    } finally { $('import').value = ''; }
+  }
+
+  $('surveyid').readOnly = true;
+  $('surveyid').setAttribute('aria-readonly', 'true');
+  $('submit').onclick = save;
+  $('clear').onclick = reset;
+  $('view').onclick = () => { $('records').hidden = !$('records').hidden; render(); };
+  $('export').onclick = exportCSV;
+  $('import').onchange = e => importCSV(e.target.files[0]);
+  // Scale only the existing app window; at 100% all original CSS dimensions remain exact.
+  // Keep the selected zoom across reloads without modifying survey records or CSV.
+  function applyZoom(value) {
+    const zoom = ['100', '75', '50'].includes(String(value)) ? String(value) : '75';
+    $('zoom').value = zoom;
+    document.querySelector('.window').style.zoom = zoom + '%';
+  }
+  $('zoom').onchange = e => {
+    applyZoom(e.target.value);
+    try { localStorage.setItem(zoomKey, $('zoom').value); } catch (_) {}
+  };
+  $('language').onchange = e => {
+    language = e.target.value === 'ne' ? 'ne' : 'en';
+    try { localStorage.setItem(languageKey, language); } catch (_) {}
+    refreshLanguage();
+  };
+
+  // Set widths while content is exactly the uploaded English version.
+  lockOriginalActionWidths();
+  total();
+  showNextId();
+  refreshLanguage();
+  let savedZoom = '75';
+  try { savedZoom = localStorage.getItem(zoomKey) || '75'; } catch (_) {}
+  applyZoom(savedZoom);
+  checkServer();
+  // Recheck the real database periodically and when returning to this page.
+  window.addEventListener('focus', checkServer);
+  setInterval(() => { if (!document.hidden && !saveBusy) checkServer(); }, 90000);
+})();
+</script></body></html>
