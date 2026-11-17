@@ -29,9 +29,10 @@ html[lang="ne"] .actions button,html[lang="ne"] .filebutton{line-height:16px}
   'use strict';
 
   const $ = id => document.getElementById(id);
-  // All data requests go to the same-origin server proxy.
-  // The Supabase project URL and key are not contained in this HTML.
-  const RPC_ENDPOINT_PREFIX = '/api/rpc/';
+  // Supabase publishable key is intended for browser clients; it is NOT private.
+  // Table rows are protected by SQL permissions and a narrowly-scoped RPC.
+  const SUPABASE_URL = 'https://nzehriemxfnrloixejub.supabase.co';
+  const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_0hNTogN1uCRyaODetPyZkQ_p0DJCiAE';
   const pendingKeyStorage = 'faculty_survey_pending_cloud_save_v1';
   let serverState = 'connecting';
   let serverNextId = null;
@@ -223,12 +224,14 @@ html[lang="ne"] .actions button,html[lang="ne"] .filebutton{line-height:16px}
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 16000);
     try {
-      const response = await fetch(RPC_ENDPOINT_PREFIX + name, {
+      const response = await fetch(SUPABASE_URL + '/rest/v1/rpc/' + name, {
         method: 'POST',
-        credentials: 'same-origin',
+        mode: 'cors',
+        credentials: 'omit',
         cache: 'no-store',
         signal: controller.signal,
-        headers: {'Content-Type': 'application/json'},
+        headers: {'apikey': SUPABASE_PUBLISHABLE_KEY,
+          'Content-Type': 'application/json'},
         body: JSON.stringify(parameters)
       });
       const text = await response.text();
